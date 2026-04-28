@@ -45,7 +45,7 @@ export function TerminalHeader({
   const {
     isLoading,
     isRealTimeEnabled,
-    isFromRedis,
+    isFromDb,
     dataSource,
     lastUpdated,
     refreshData,
@@ -121,7 +121,7 @@ export function TerminalHeader({
         {isDarkMode ? "LIGHT" : "DARK"}
       </BloombergButton>
 
-      {/* Redis Control Buttons */}
+      {/* Data Control Buttons */}
       <div className="ml-auto flex items-center gap-2">
         <BloombergButton color="accent" onClick={refreshData} disabled={isLoading}>
           REFR
@@ -140,13 +140,13 @@ export function TerminalHeader({
             <RefreshCw className="h-3 w-3 animate-spin" />
           ) : isRealTimeEnabled ? (
             <Wifi className="h-3 w-3 text-green-500" />
-          ) : isFromRedis ? (
+          ) : isFromDb ? (
             <Database className="h-3 w-3 text-green-500" />
           ) : (
             <AlertTriangle className="h-3 w-3 text-yellow-500" />
           )}
-          <span className={isFromRedis ? "text-green-500" : "text-yellow-500"}>
-            {dataSource === "alpha-vantage" ? "API" : isFromRedis ? "Redis" : "Local"}
+          <span className={isFromDb ? "text-green-500" : "text-yellow-500"}>
+            {dataSource === "alpha-vantage" ? "API" : isFromDb ? "DB" : "Local"}
           </span>
           {getDataFreshnessIndicator()}
           {lastUpdated && <span className="text-gray-400">{lastUpdated.toLocaleTimeString()}</span>}

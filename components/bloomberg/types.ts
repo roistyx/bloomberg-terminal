@@ -26,7 +26,7 @@ export type MarketData = {
   asiaPacific: MarketItem[];
   lastUpdated?: string;
   lastSparklineUpdate?: string;
-  isFromRedis?: boolean;
+  isFromDb?: boolean;
   dataSource?: string;
   [key: string]: MarketItem[] | string | boolean | undefined; // Type-safe index signature for dynamic access
 };

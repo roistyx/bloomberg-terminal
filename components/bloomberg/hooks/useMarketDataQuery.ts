@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { fetchMarketData, simulateMarketUpdate } from "../api/market-data";
 import {
   dataSourceAtom,
-  isFromRedisAtom,
+  isFromDbAtom,
   isRealTimeEnabledAtom,
   lastUpdatedAtom,
   updatedCellsAtom,
@@ -27,7 +27,7 @@ export function useMarketDataQuery() {
   const [lastUpdated, setLastUpdated] = useAtom(lastUpdatedAtom);
   const [isRealTimeEnabled, setIsRealTimeEnabled] = useAtom(isRealTimeEnabledAtom);
   const [dataSource, setDataSource] = useAtom(dataSourceAtom);
-  const [isFromRedis, setIsFromRedis] = useAtom(isFromRedisAtom);
+  const [isFromDb, setIsFromDb] = useAtom(isFromDbAtom);
 
   // Refs for tracking updates
   const prevDataRef = useRef<MarketData | null>(null);
@@ -116,8 +116,8 @@ export function useMarketDataQuery() {
       setDataSource(newData.source);
     }
 
-    if (newData.fromRedis !== undefined) {
-      setIsFromRedis(newData.fromRedis);
+    if (newData.fromDb !== undefined) {
+      setIsFromDb(newData.fromDb);
     }
 
     // Update the previous data ref
@@ -128,7 +128,7 @@ export function useMarketDataQuery() {
     setUpdatedSparklines,
     setLastUpdated,
     setDataSource,
-    setIsFromRedis,
+    setIsFromDb,
   ]);
 
   // Toggle real-time updates
@@ -151,7 +151,7 @@ export function useMarketDataQuery() {
     updatedSparklines,
     isRealTimeEnabled,
     dataSource,
-    isFromRedis,
+    isFromDb,
     toggleRealTimeUpdates,
     refreshData,
   };

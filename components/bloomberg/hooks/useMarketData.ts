@@ -14,7 +14,7 @@ import {
 import { queryKeys } from "../api/query-keys";
 import {
   dataSourceAtom,
-  isFromRedisAtom,
+  isFromDbAtom,
   isRealTimeEnabledAtom,
   lastUpdatedAtom,
   updatedCellsAtom,
@@ -29,7 +29,7 @@ export function useAllMarketData() {
   const [isRealTimeEnabled, setIsRealTimeEnabled] = useAtom(isRealTimeEnabledAtom);
   const [, setLastUpdated] = useAtom(lastUpdatedAtom);
   const [, setDataSource] = useAtom(dataSourceAtom);
-  const [, setIsFromRedis] = useAtom(isFromRedisAtom);
+  const [, setIsFromDb] = useAtom(isFromDbAtom);
 
   const queryClient = useQueryClient();
 
@@ -53,11 +53,11 @@ export function useAllMarketData() {
         setDataSource(marketDataQuery.data.source as string);
       }
 
-      if (marketDataQuery.data.fromRedis !== undefined) {
-        setIsFromRedis(marketDataQuery.data.fromRedis as boolean);
+      if (marketDataQuery.data.fromDb !== undefined) {
+        setIsFromDb(marketDataQuery.data.fromDb as boolean);
       }
     }
-  }, [marketDataQuery.data, setLastUpdated, setDataSource, setIsFromRedis]);
+  }, [marketDataQuery.data, setLastUpdated, setDataSource, setIsFromDb]);
 
   // Mutation for manually refreshing data
   const refreshMutation = useMutation({
@@ -330,7 +330,7 @@ export function useMarketDataQuery() {
   const { updatedCells, updatedSparklines } = useMarketDataUpdates();
   const [lastUpdated] = useAtom(lastUpdatedAtom);
   const [dataSource] = useAtom(dataSourceAtom);
-  const [isFromRedis] = useAtom(isFromRedisAtom);
+  const [isFromDb] = useAtom(isFromDbAtom);
 
   // Create selectors for specific data views
   const getAmericasData = useCallback(() => getRegionData("americas"), [getRegionData]);
@@ -347,7 +347,7 @@ export function useMarketDataQuery() {
     updatedSparklines,
     isRealTimeEnabled,
     dataSource,
-    isFromRedis,
+    isFromDb,
     toggleRealTimeUpdates,
     refreshData,
     // Selectors for derived state
