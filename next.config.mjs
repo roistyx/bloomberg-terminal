@@ -12,7 +12,7 @@ const nextConfig = {
   // Expose backend URL to server-side route handlers.
   // Defaults to the local Namaste dev server; override via BACKEND_URL in .env.local.
   env: {
-    BACKEND_URL: process.env.BACKEND_URL ?? "https://127.0.0.1:3001",
+    BACKEND_URL: process.env.BACKEND_URL ?? "http://localhost:3001",
   },
 };
 
