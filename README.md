@@ -19,7 +19,7 @@ Clone of the Bloomberg Terminal built with Next.js 15, React 19, and TypeScript.
 - **UI Library**: React 19 with shadcn/ui components
 - **Styling**: Tailwind CSS
 - **State Management**: Jotai for local state, React Query for server state
-- **Data Storage**: Upstash Redis
+- **Backend**: Express server (`backend/`) with MongoDB for market-data caching and rate limiting
 - **Animation**: Motion (formerly Framer Motion)
 - **Linting/Formatting**: Biome.js
 
@@ -32,12 +32,16 @@ Clone of the Bloomberg Terminal built with Next.js 15, React 19, and TypeScript.
 
 ### Environment Variables
 
-Create a `.env.local` file with the following variables:
+Copy `.env.local.example` to `.env.local` and fill in the values:
 
 ```
-# Upstash Redis connection details
-UPSTASH_REDIS_REST_URL=your_upstash_redis_url
-UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB=bloomberg
+
+# Express backend URL (consumed by the Next.js proxy route)
+BACKEND_URL=http://localhost:3001
+BACKEND_PORT=3001
 
 # Alpha Vantage API key for market data
 ALPHA_VANTAGE_API_KEY=your_alpha_vantage_api_key
@@ -49,11 +53,33 @@ OPENAI_API_KEY=your_openai_api_key
 ALLOWED_ORIGINS=https://your-domain.com,http://localhost:3000
 ```
 
+### Running Locally
+
+The app has two processes: the Next.js frontend and an Express backend that talks to MongoDB. Both read `.env.local` from the repo root.
+
+```bash
+# Install dependencies for both packages
+pnpm install
+pnpm --dir backend install
+
+# Terminal 1: start MongoDB (e.g. a local install or Docker)
+docker run -d -p 27017:27017 --name bloomberg-mongo mongo
+
+# Terminal 2: start the backend on BACKEND_PORT (default 3001)
+pnpm --dir backend dev
+
+# Terminal 3: start the frontend on http://localhost:3000
+pnpm dev
+```
+
+The backend exposes `GET /api/market-data`, `POST /api/market-data`, and `POST /api/seed`. The Next.js route at `app/api/market-data` proxies to it using `BACKEND_URL`, so the browser only ever talks to the Next.js server. Market data is cached in the `market_data` collection with a TTL index and falls back to bundled sample data when Alpha Vantage is unavailable.
+
 ## Project Structure
 
 The project is structured as follows:
 
-- `/app`: Next.js App Router pages and API routes
+- `/app`: Next.js App Router pages and API routes (the market-data route proxies to the backend)
+- `/backend`: Express + MongoDB server (`server.ts`) with its own `package.json`
 - `/components/bloomberg`: Terminal-specific components
   - `/api`: API client functions for market data fetching and simulation
   - `/atoms`: Jotai atoms for local state management
@@ -71,7 +97,7 @@ The project is structured as follows:
   - `/views`: Main view components for different terminal screens
     - Market view, news view, volatility view, etc.
 - `/components/ui`: shadcn/ui base components (design system)
-- `/lib`: Application-wide utility functions and shared code
+- `/lib`: Application-wide utility functions and shared code, including the MongoDB client and Alpha Vantage fetcher
 - `/public`: Static assets and images
 
 ### Component Organization Philosophy
@@ -93,7 +119,7 @@ Components are organized based on:
 ## Security Features
 
 - **Origin Restriction**: API endpoints are restricted to specific domains configured via the `ALLOWED_ORIGINS` environment variable
-- **Rate Limiting**: Prevents abuse by limiting requests per IP address
+- **Rate Limiting**: Prevents abuse by limiting requests per IP address, tracked in MongoDB
 - **Input Validation**: All API inputs are validated and sanitized using Zod schemas
 - **Response Limiting**: AI responses are limited in token count to prevent excessive usage
 - **Environment Variables**: Sensitive keys are stored in environment variables and not exposed to the client
